@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Jimpitan · Kolektif Mingguan</title>
+    <!-- Google Fonts + Ikon -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #e0f2e9 0%, #c8e0d4 100%);
+            min-height: 100vh;
+            padding: 1.2rem;
+            position: relative;
+        }
+
+        /* efek kaca (glassmorphism) seperti style KLEGENZ modern */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(16px);
+            border-radius: 2.5rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* header seperti cuaca / tropical */
+        .weather-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 1.2rem;
+            padding: 0.6rem 1.2rem;
+        }
+
+        .logo-area h2 {
+            font-weight: 700;
+            font-size: 1.7rem;
+            background: linear-gradient(135deg, #1e4a3b, #2c7a4d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-area p {
+            font-size: 0.75rem;
+            color: #2c5a44;
+            font-weight: 500;
+        }
+
+        .weather-widget {
+            background: rgba(255,250,210,0.5);
+            backdrop-filter: blur(8px);
+            border-radius: 60px;
+            padding: 0.5rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid rgba(255,215,140,0.6);
+        }
+
+        .weather-icon {
+            font-size: 2rem;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+
+        .temp {
+            font-weight: 800;
+            font-size: 1.6rem;
+            color: #2c3e2b;
+        }
+
+        .condition {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #3d5e3f;
+        }
+
+        /* notifikasi bar realtime gaya segar */
+        .notif-bar {
+            margin: 1rem 0 1.5rem 0;
+            padding: 0.9rem 1.5rem;
+            background: rgba(255, 248, 225, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            border: 1px solid rgba(255,210,120,0.6);
+        }
+
+        .notif-badge {
+            background: #f5a623;
+            padding: 0.4rem 1rem;
+            border-radius: 80px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .notif-text {
+            flex: 1;
+            font-weight: 500;
+            color: #2e4a35;
+            font-size: 0.9rem;
+        }
+
+        .live-pulse {
+            background: rgba(46, 125, 74, 0.2);
+            border-radius: 40px;
+            padding: 0.3rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #1f543b;
+        }
+
+        /* minggu navigasi gaya chips */
+        .week-chips {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .chip-week {
+            background: rgba(255,255,235,0.5);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,200,0.7);
+            padding: 0.65rem 1.3rem;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #2d5a41;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chip-week.active {
+            background: #f9c74f;
+            color: #1e3b2c;
+            border-color: #f9c74f;
+            box-shadow: 0 8px 18px rgba(249,199,79,0.25);
+        }
+
+        .chip-week i {
+            font-size: 0.8rem;
+        }
+
+        /* 2 kolom LOR & KIDOL seperti kaca premium */
+        .schedule-panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .panel {
+            background: rgba(255, 250, 240, 0.55);
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
+            padding: 1.5rem 1.2rem;
+            transition: transform 0.2s;
+            border: 1px solid rgba(255,245,205,0.8);
+        }
+
+        .panel:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 252, 235, 0.7);
+        }
+
+        .panel h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #2c6e49;
+            margin-bottom: 1rem;
+            border-left: 5px solid #f9c74f;
+            padding-left: 0.8rem;
+        }
+
+        .person-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 100px;
+            margin: 0.4rem 0.4rem;
+            font-weight: 600;
+            color: #2d4a3a;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            border: 1px solid #e0e9cf;
+        }
+
+        .person-chip i {
+            color: #f9a826;
+        }
+
+        .empty-state {
+            color: #687a6b;
+            font-style: italic;
+            padding: 0.8rem;
+            font-weight: 500;
+        }
+
+        .footer-note {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #406653;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1rem 0 0.2rem;
+            border-top: 1px solid rgba(100,100,70,0.15);
+        }
+
+        @media (max-width: 700px) {
+            .schedule-panels {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .weather-header {
+                flex-direction: column;
+                align-items: start;
+                gap: 10px;
+            }
+            .notif-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        /* animasi live bell */
+        @keyframes gentleShake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            75% { transform: rotate(-6deg); }
+        }
+        .bell-animate {
+            animation: gentleShake 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <!-- header tropical / sunny seperti KLEGENZ -->
+    <div class="weather-header glass-card" style="padding: 0.8rem 1.4rem;">
+        <div class="logo-area">
+            <h2><i class="fas fa-hand-holding-heart" style="color: #f5a623;"></i> JIMPITAN</h2>
+            <p>jadwal ambil · kolektif mingguan</p>
+        </div>
+        <div class="weather-widget">
+            <i class="fas fa-sun weather-icon" style="color: #f5b342;"></i>
+            <div>
+                <span class="temp" id="tempDisplay">86°</span>
+                <div class="condition">Cerah / Tropical</div>
+            </div>
+            <i class="fas fa-leaf" style="color: #468a56;"></i>
+        </div>
+    </div>
+
+    <!-- realtime notifikasi -->
+    <div class="notif-bar" id="notifBar">
+        <div class="notif-badge"><i class="fas fa-bell" id="bellIcon"></i> PENGINGAT</div>
+        <div class="notif-text" id="notifMessage">Memuat jadwal mingguan ...</div>
+        <div class="live-pulse"><i class="fas fa-circle" style="font-size: 0.5rem; color: #2ecc71;"></i> LIVE · RT</div>
+    </div>
+
+    <!-- minggu chips -->
+    <div class="week-chips" id="weekChipsContainer">
+        <!-- dynamic via js -->
+    </div>
+
+    <!-- LOR & KIDOL panels -->
+    <div class="schedule-panels">
+        <div class="panel">
+            <h3><i class="fas fa-compass"></i> LOR <span style="font-size: 0.75rem;">(Barat / Utara)</span></h3>
+            <div id="lorList" class="person-list" style="display: flex; flex-wrap: wrap;"></div>
+        </div>
+        <div class="panel">
+            <h3><i class="fas fa-tree"></i> KIDOL <span style="font-size: 0.75rem;">(Timur / Selatan)</span></h3>
+            <div id="kidolList" class="person-list" style="display: flex; flex-wrap: wrap;"></div>
+        </div>
+    </div>
+    <div class="footer-note">
+        <span><i class="far fa-calendar-check"></i> notifikasi per minggu otomatis</span>
+        <span><i class="fas fa-users"></i> jimpitan warga guyub</span>
+        <span><i class="fas fa-mobile-alt"></i> realtime</span>
+    </div>
+</div>
+
+<script>
+    // ======================= DATA SAMA PERSIS DENGAN PERMINTAAN =======================
+    const SCHEDULE = {
+        1: {
+            lor: ["Eko", "Toni"],
+            kidol: ["Riko", "Repando"]
+        },
+        2: {
+            lor: ["Dika", "Pariono"],
+            kidol: ["Iqbal", "Rendi"]
+        },
+        3: {
+            lor: ["Yadi", "Putra"],
+            kidol: ["Ayik", "Rudi"]
+        },
+        4: {
+            lor: ["Seni", "Gita"],
+            kidol: ["Desi", "Cinta", "Melinda"]
+        }
+    };
+
+    // FUNGSI REAL-TIME MINGGU (berdasarkan tanggal)
+    function getCurrentWeekOfMonth(date = new Date()) {
+        const day = date.getDate();
+        if (day <= 7) return 1;
+        if (day <= 14) return 2;
+        if (day <= 21) return 3;
+        return 4;
+    }
+
+    let activeWeek = getCurrentWeekOfMonth();
+    let lastNotifiedWeek = null;
+
+    // DOM elements
+    const lorContainer = document.getElementById("lorList");
+    const kidolContainer = document.getElementById("kidolList");
+    const notifMessageSpan = document.getElementById("notifMessage");
+    const weekChipsDiv = document.getElementById("weekChipsContainer");
+    const tempSpan = document.getElementById("tempDisplay");
+
+    // utility: update tampilan suhu (konsep cuaca)
+    function updateWeatherMood() {
+        const nowHour = new Date().getHours();
+        let tempBase = 86;
+        if (nowHour < 10) tempBase = 79;
+        else if (nowHour > 18) tempBase = 81;
+        else tempBase = 88;
+        tempSpan.innerText = tempBase + "°";
+    }
+    setInterval(updateWeatherMood, 600000);
+    updateWeatherMood();
+
+    // RENDER jadwal berdasarkan minggu
+    function renderByWeek(weekNum) {
+        const data = SCHEDULE[weekNum];
+        if (!data) return;
+
+        // Render LOR
+        lorContainer.innerHTML = "";
+        if (data.lor.length === 0) {
+            lorContainer.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i> Tidak ada petugas</div>';
+        } else {
+            data.lor.forEach(name => {
+                const chip = document.createElement("div");
+                chip.className = "person-chip";
+                chip.innerHTML = `<i class="fas fa-user-check"></i> ${name}`;
+                lorContainer.appendChild(chip);
+            });
+        }
+
+        // Render KIDOL
+        kidolContainer.innerHTML = "";
+        if (data.kidol.length === 0) {
+            kidolContainer.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i> Tidak ada petugas</div>';
+        } else {
+            data.kidol.forEach(name => {
+                const chip = document.createElement("div");
+                chip.className = "person-chip";
+                chip.innerHTML = `<i class="fas fa-user-check"></i> ${name}`;
+                kidolContainer.appendChild(chip);
+            });
+        }
+
+        // update active chip visual
+        document.querySelectorAll(".chip-week").forEach(btn => {
+            const w = parseInt(btn.getAttribute("data-week"));
+            if (w === weekNum) btn.classList.add("active");
+            else btn.classList.remove("active");
+        });
+    }
+
+    // NOTIFIKASI + UPDATE BAR (real-time messaging)
+    function pushNotificationUpdate(weekNum, forceNotify = false) {
+        const weekData = SCHEDULE[weekNum];
+        if (!weekData) return;
+        const lorStr = weekData.lor.join(", ");
+        const kidolStr = weekData.kidol.join(", ");
+        const notifText = `MINGGU ${weekNum} · LOR : (${lorStr})  ✦  KIDOL : (${kidolStr}) · siapkan jimpitan!`;
+
+        // update tampilan notifikasi di bar
+        notifMessageSpan.innerHTML = `<i class="fas fa-calendar-week"></i> <strong>Minggu ${weekNum}</strong> — LOR: ${lorStr} &nbsp;|&nbsp; KIDOL: ${kidolStr}`;
+
+        // animasi bel sekaligus notifikasi browser jika minggu berubah atau dipaksa
+        const bell = document.getElementById("bellIcon");
+        if (bell) {
+            bell.classList.add("bell-animate");
+            setTimeout(() => bell.classList.remove("bell-animate"), 500);
+        }
+
+        const shouldNotify = (lastNotifiedWeek !== weekNum) || forceNotify;
+        if (shouldNotify) {
+            // Browser notifikasi (izin akan diminta secara halus)
+            if (Notification.permission === "granted") {
+                new Notification("🏮 Jimpitan Minggu Ini", {
+                    body: `Minggu ${weekNum} ➜ LOR: ${lorStr} | KIDOL: ${kidolStr}. Ambil jimpitan!`,
+                    icon: "https://cdn-icons-png.flaticon.com/512/1995/1995572.png",
+                    silent: false,
+                });
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(perm => {
+                    if (perm === "granted") {
+                        new Notification("🏮 Jadwal Jimpitan", {
+                            body: `Minggu ${weekNum} — LOR: ${lorStr} · KIDOL: ${kidolStr}`,
+                            icon: "https://cdn-icons-png.flaticon.com/512/1995/1995572.png"
+                        });
+                    }
+                });
+            }
+            lastNotifiedWeek = weekNum;
+            // efek getar pada notif bar
+            const bar = document.getElementById("notifBar");
+            bar.style.transition = "0.2s";
+            bar.style.background = "rgba(253, 226, 156, 0.85)";
+            setTimeout(() => bar.style.background = "rgba(255, 248, 225, 0.7)", 600);
+        }
+    }
+
+    // set active minggu (panggil dari user / otomatis)
+    function setActiveWeek(weekNumber, isManual = false) {
+        if (weekNumber < 1 || weekNumber > 4) return;
+        activeWeek = weekNumber;
+        renderByWeek(activeWeek);
+        pushNotificationUpdate(activeWeek, isManual);
+    }
+
+    // membuat tombol navigasi minggu dengan gaya chips
+    function buildWeekChips() {
+        weekChipsDiv.innerHTML = "";
+        for (let i = 1; i <= 4; i++) {
+            const chip = document.createElement("div");
+            chip.className = "chip-week";
+            if (i === activeWeek) chip.classList.add("active");
+            chip.setAttribute("data-week", i);
+            chip.innerHTML = `<i class="fas fa-calendar-day"></i> MINGGU ${i}`;
+            chip.addEventListener("click", (e) => {
+                e.preventDefault();
+                const newWeek = i;
+                if (activeWeek !== newWeek) {
+                    setActiveWeek(newWeek, true);
+                } else {
+                    // jika minggu sama, tetap update notif ringan (tanpa notif browser double)
+                    pushNotificationUpdate(newWeek, false);
+                }
+            });
+            weekChipsDiv.appendChild(chip);
+        }
+    }
+
+    // =============== SISTEM REAL-TIME DETEKSI PERGANTIAN MINGGU ===============
+    let lastKnownWeek = activeWeek;
+
+    function checkRealTimeWeek() {
+        const now = new Date();
+        const currentWeek = getCurrentWeekOfMonth(now);
+        if (currentWeek !== lastKnownWeek) {
+            // minggu berganti secara otomatis!
+            lastKnownWeek = currentWeek;
+            activeWeek = currentWeek;
+            renderByWeek(activeWeek);
+            pushNotificationUpdate(activeWeek, true); // force notify karena minggu baru
+            // update active chips style
+            document.querySelectorAll(".chip-week").forEach(btn => {
+                const w = parseInt(btn.getAttribute("data-week"));
+                if (w === activeWeek) btn.classList.add("active");
+                else btn.classList.remove("active");
+            });
+            // tambahan efek sukses pergantian
+            const notifDiv = document.getElementById("notifBar");
+            notifDiv.style.background = "#fdebb3";
+            setTimeout(() => notifDiv.style.background = "rgba(255, 248, 225, 0.7)", 800);
+        }
+    }
+
+    // Interval pengecekan setiap 30 detik + saat tab aktif kembali
+    let interval = setInterval(checkRealTimeWeek, 30000);
+    document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) checkRealTimeWeek();
+    });
+
+    // juga setiap menit untuk sinkronisasi penuh
+    setInterval(() => {
+        checkRealTimeWeek();
+        updateWeatherMood();
+    }, 60000);
+
+    // Request ijin notifikasi saat user pertama interaksi (dengan cara gentle saat klik di notifbar atau week)
+    function requestNotificationPermissionOnAction() {
+        if (Notification.permission === "default") {
+            Notification.requestPermission();
+        }
+    }
+    // Tambahkan listener di beberapa area agar user tidak terganggu, tapi tetap minta izin saat interaksi
+    document.body.addEventListener("click", (e) => {
+        if (Notification.permission === "default") {
+            Notification.requestPermission();
+        }
+    }, { once: true });
+
+    // INISIALISASI SAAT LOAD
+    window.addEventListener("load", () => {
+        buildWeekChips();
+        lastKnownWeek = getCurrentWeekOfMonth();
+        activeWeek = lastKnownWeek;
+        renderByWeek(activeWeek);
+        pushNotificationUpdate(activeWeek, false); // set notifikasi awal tanpa spam
+        // set title dinamis
+        document.title = `🌿 Jimpitan · Minggu ${activeWeek}`;
+
+        // extra: tambahkan sedikit pesan selamat datang realtime
+        const hiMsg = `✨ Jadwal aktif minggu ${activeWeek} · siapkan infak jimpitan ✨`;
+        console.log(hiMsg);
+    });
+
+    // bersihkan interval saat unload (opsional)
+    window.addEventListener("beforeunload", () => {
+        if (interval) clearInterval(interval);
+    });
+
+    // make sure data integrity / fallback
+    window.SCHEDULE = SCHEDULE;
+</script>
+</body>
+</html>
