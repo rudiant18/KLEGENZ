@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Jimpitan Schedule · Notifikasi Mingguan Real-time</title>
+    <!-- Google Fonts & simple CSS reset -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f0f4fa 0%, #d9e2ef 100%);
+            font-family: 'Inter', sans-serif;
+            padding: 1.5rem;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* realtime pulse background (optional) */
+        .glass-panel {
+            max-width: 1300px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(14px);
+            border-radius: 2.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.05);
+            padding: 1.8rem 2rem 2.2rem;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        h1 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #1e2b3c, #2a4a6e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            margin-bottom: 0.25rem;
+        }
+
+        h1 i {
+            background: none;
+            -webkit-background-clip: unset;
+            background-clip: unset;
+            color: #f6b83d;
+            font-size: 2rem;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .sub {
+            color: #2c3e44;
+            font-weight: 500;
+            margin-bottom: 1.8rem;
+            border-left: 4px solid #f6b83d;
+            padding-left: 1rem;
+            font-size: 0.95rem;
+            background: rgba(0,0,0,0.02);
+            border-radius: 0 12px 12px 0;
+        }
+
+        /* realtime notif bar */
+        .notification-bar {
+            background: #1e2f3c;
+            border-radius: 80px;
+            padding: 0.8rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,215,150,0.5);
+        }
+
+        .notif-badge {
+            background: #f6b83d;
+            color: #1e2b3c;
+            padding: 0.4rem 1rem;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notif-message {
+            color: #f9eec1;
+            font-weight: 500;
+            flex: 1;
+            font-size: 0.95rem;
+            letter-spacing: -0.2px;
+        }
+
+        .notif-message strong {
+            color: #ffdf99;
+            font-weight: 800;
+        }
+
+        .live-tag {
+            background: rgba(255,255,240,0.15);
+            padding: 0.3rem 0.9rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #ffecb3;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .live-tag i {
+            font-size: 0.65rem;
+            color: #4ef0b0;
+        }
+
+        /* week selector */
+        .week-nav {
+            display: flex;
+            background: rgba(0, 0, 0, 0.12);
+            border-radius: 60px;
+            padding: 0.3rem;
+            margin-bottom: 2rem;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .week-btn {
+            background: transparent;
+            border: none;
+            padding: 0.6rem 1.3rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #2c3e44;
+            font-family: 'Inter', sans-serif;
+            flex: 1;
+            min-width: 85px;
+        }
+
+        .week-btn.active {
+            background: #ffffffcc;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+            color: #1f4a6e;
+            border: 1px solid white;
+        }
+
+        .week-btn:hover:not(.active) {
+            background: rgba(255,255,200,0.5);
+        }
+
+        /* jadwal utama - 2 columns */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.8rem;
+            margin: 1.2rem 0 1.8rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(4px);
+            border-radius: 2rem;
+            padding: 1.4rem 1.6rem;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+            border: 1px solid rgba(255,255,245,0.8);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .card h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            border-bottom: 3px dotted #f6b83d;
+            display: inline-block;
+            padding-bottom: 6px;
+        }
+
+        .badge-loc {
+            background: #1e2b3c;
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            margin-left: 12px;
+            vertical-align: middle;
+        }
+
+        .person-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .person-tag {
+            background: white;
+            border-radius: 100px;
+            padding: 0.5rem 1.2rem;
+            font-weight: 600;
+            color: #1f3b4a;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            transition: 0.1s;
+            border: 1px solid #ebf0f5;
+        }
+
+        .person-tag i {
+            color: #f6b83d;
+            font-size: 0.8rem;
+        }
+
+        .empty-note {
+            color: #7e8c8d;
+            font-style: italic;
+            padding: 0.5rem 0;
+            font-weight: 400;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            color: #4b5f6b;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding-top: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            align-items: center;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 1rem;
+            }
+            .glass-panel {
+                padding: 1rem;
+            }
+            .schedule-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .week-btn {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.8rem;
+            }
+            .notif-message {
+                font-size: 0.8rem;
+            }
+        }
+
+        .fa-bell {
+            animation: bellShake 0.5s ease;
+        }
+
+        @keyframes bellShake {
+            0% { transform: rotate(0deg);}
+            25% { transform: rotate(12deg);}
+            75% { transform: rotate(-8deg);}
+            100% { transform: rotate(0deg);}
+        }
+    </style>
+</head>
+<body>
+
+<div class="glass-panel">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <h1>
+            <i class="fas fa-hand-holding-usd"></i> 
+            JADWAL AMBIL JIMPITAN
+        </h1>
+        <div class="live-tag">
+            <i class="fas fa-circle" style="font-size: 0.6rem;"></i> REAL-TIME · MINGGUAN
+        </div>
+    </div>
+    <div class="sub">
+        <i class="fas fa-calendar-alt"></i> sistem notifikasi aktif · otomatis update tiap minggu
+    </div>
+
+    <!-- realtime notifikasi bar -->
+    <div class="notification-bar" id="notificationBar">
+        <div class="notif-badge">
+            <i class="fas fa-bell"></i> NOTIF MINGGU INI
+        </div>
+        <div class="notif-message" id="notifMessage">
+            Memuat jadwal ...
+        </div>
+        <div class="live-tag">
+            <i class="fas fa-sync-alt"></i> live
+        </div>
+    </div>
+
+    <!-- navigasi minggu -->
+    <div class="week-nav" id="weekNavContainer">
+        <!-- 4 tombol akan diisi JS -->
+    </div>
+
+    <!-- jadwal utama LOR & KIDOL -->
+    <div class="schedule-grid">
+        <div class="card">
+            <h2><i class="fas fa-map-marker-alt"></i> LOR <span class="badge-loc">Barat / Utara</span></h2>
+            <div id="lorList" class="person-list">
+                <!-- daftar orang lor -->
+            </div>
+        </div>
+        <div class="card">
+            <h2><i class="fas fa-tree"></i> KIDOL <span class="badge-loc">Timur / Selatan</span></h2>
+            <div id="kidolList" class="person-list">
+                <!-- daftar orang kidol -->
+            </div>
+        </div>
+    </div>
+    <div class="footer-note">
+        <span><i class="far fa-clock"></i> penjadwalan mingguan | notifikasi muncul otomatis saat minggu ganti</span>
+        <span><i class="fas fa-users"></i> jimpitan kolektif warga</span>
+    </div>
+</div>
+
+<script>
+    // ======================= DATA JADWAL LENGKAP =======================
+    // berdasarkan input: 
+    // MINGGU 1 LOR: (Eko & Toni, ) -> Eko, Toni   KIDOL: (Riko, Repando)
+    // MINGGU 2 LOR: (Dika & pariono) -> Dika, Pariono   KIDOL: (Iqbal ,Rendi)
+    // MINGGU 3 LOR: (yadi & Putra)   -> Yadi, Putra     KIDOL: (Ayik & Rudi)
+    // MINGGU 4 LOR: (Seni, Gita )    -> Seni, Gita      KIDOL: ( Desi, cinta,  melinda)
+    // (Catatan: penulisan nama disesuaikan, 'pariono' => Pariono, 'yadi' => Yadi, dll agar rapi)
+    const scheduleData = {
+        1: {
+            lor: ["Eko", "Toni"],
+            kidol: ["Riko", "Repando"]
+        },
+        2: {
+            lor: ["Dika", "Pariono"],
+            kidol: ["Iqbal", "Rendi"]
+        },
+        3: {
+            lor: ["Yadi", "Putra"],
+            kidol: ["Ayik", "Rudi"]
+        },
+        4: {
+            lor: ["Seni", "Gita"],
+            kidol: ["Desi", "Cinta", "Melinda"]
+        }
+    };
+
+    // ======================= LOGIKA REAL-TIME MINGGU & NOTIF =======================
+    // Fungsi menghitung minggu ke- berapa dalam bulan berjalan (1-4) berdasarkan tanggal realtime
+    // Dengan asumsi: setiap bulan dibagi 4 minggu (minggu 1 = hari 1-7, minggu 2 = 8-14, minggu 3=15-21, minggu 4=22-end)
+    // Agar notifikasi perminggu robust, kita pakai sistem 'currentWeekOfMonth'
+    function getCurrentWeekOfMonth(date = new Date()) {
+        const dayOfMonth = date.getDate();
+        if (dayOfMonth <= 7) return 1;
+        if (dayOfMonth <= 14) return 2;
+        if (dayOfMonth <= 21) return 3;
+        return 4;
+    }
+
+    // variabel global untuk state minggu aktif (1-4)
+    let activeWeek = getCurrentWeekOfMonth();   // realtime minggu sekarang
+    let previousNotifWeek = null;   // untuk cegah notif dobel
+
+    // Element references
+    const lorContainer = document.getElementById("lorList");
+    const kidolContainer = document.getElementById("kidolList");
+    const notifMessageSpan = document.getElementById("notifMessage");
+    const weekNavContainer = document.getElementById("weekNavContainer");
+
+    // fungsi untuk render tampilan jadwal berdasarkan minggu tertentu
+    function renderScheduleByWeek(weekNumber) {
+        const weekData = scheduleData[weekNumber];
+        if (!weekData) return;
+
+        // Render LOR
+        const lorNames = weekData.lor;
+        lorContainer.innerHTML = "";
+        if (lorNames.length === 0) {
+            lorContainer.innerHTML = '<div class="empty-note"><i class="fas fa-user-slash"></i> Tidak ada petugas</div>';
+        } else {
+            lorNames.forEach(name => {
+                const tag = document.createElement("div");
+                tag.className = "person-tag";
+                tag.innerHTML = `<i class="fas fa-user-check"></i> ${name}`;
+                lorContainer.appendChild(tag);
+            });
+        }
+
+        // Render KIDOL
+        const kidolNames = weekData.kidol;
+        kidolContainer.innerHTML = "";
+        if (kidolNames.length === 0) {
+            kidolContainer.innerHTML = '<div class="empty-note"><i class="fas fa-user-slash"></i> Tidak ada petugas</div>';
+        } else {
+            kidolNames.forEach(name => {
+                const tag = document.createElement("div");
+                tag.className = "person-tag";
+                tag.innerHTML = `<i class="fas fa-user-check"></i> ${name}`;
+                kidolContainer.appendChild(tag);
+            });
+        }
+
+        // update active class pada tombol navigasi
+        document.querySelectorAll(".week-btn").forEach(btn => {
+            const btnWeek = parseInt(btn.getAttribute("data-week"));
+            if (btnWeek === weekNumber) {
+                btn.classList.add("active");
+            } else {
+                btn.classList.remove("active");
+            }
+        });
+    }
+
+    // fungsi untuk mengirim notifikasi / update notifikasi bar berdasarkan minggu aktif (real-time)
+    function updateNotification(weekNumber, forceNotification = false) {
+        const weekData = scheduleData[weekNumber];
+        if (!weekData) return;
+
+        const lorListStr = weekData.lor.join(", ");
+        const kidolListStr = weekData.kidol.join(", ");
+        // format notifikasi jelas
+        const notifText = `🔔 MINGGU ${weekNumber} · LOR : (${lorListStr})  |  KIDOL : (${kidolListStr}) ·  Ambil jimpitan minggu ini!`;
+
+        // Set notif message (real time)
+        notifMessageSpan.innerHTML = `<strong><i class="fas fa-hand-holding-heart"></i> Jadwal minggu ${weekNumber}</strong> — LOR: ${lorListStr} &nbsp;|&nbsp; KIDOL: ${kidolListStr}`;
+        
+        // Jika minggu berubah (atau force notifikasi karena manual pilih via navigasi) 
+        // kita akan trigger browser notifikasi (web notifikasi) jika diizinkan, plus animasi bell
+        const isWeekChanged = (previousNotifWeek !== weekNumber);
+        if ((isWeekChanged || forceNotification) && weekNumber !== null) {
+            // Animasi pada ikon bell di notification bar
+            const bellIcon = document.querySelector(".notif-badge i");
+            if (bellIcon) {
+                bellIcon.classList.add("fa-bell");
+                bellIcon.style.animation = "bellShake 0.6s ease";
+                setTimeout(() => {
+                    if (bellIcon) bellIcon.style.animation = "";
+                }, 600);
+            }
+            
+            // Request izin notifikasi browser jika belum, lalu kirim notifikasi
+            if (Notification.permission === "granted") {
+                new Notification("📢 JADWAL JIMPITAN PERMINGGU", {
+                    body: `Minggu ${weekNumber} ➜ LOR: ${lorListStr} | KIDOL: ${kidolListStr}. Saatnya ambil jimpitan!`,
+                    icon: "https://cdn-icons-png.flaticon.com/512/1995/1995572.png",
+                    silent: false,
+                });
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(perm => {
+                    if (perm === "granted") {
+                        new Notification("📢 Jadwal Jimpitan Update", {
+                            body: `Minggu ${weekNumber} — LOR: ${lorListStr} · KIDOL: ${kidolListStr}`,
+                            icon: "https://cdn-icons-png.flaticon.com/512/1995/1995572.png"
+                        });
+                    }
+                });
+            }
+            previousNotifWeek = weekNumber;
+            
+            // efek realtime kecil di konsol (opsional)
+            console.log(`[REALTIME NOTIF] Minggu ${weekNumber} diaktifkan, notifikasi dikirim.`);
+        }
+    }
+
+    // fungsi set minggu secara lengkap (update UI + notifikasi jika perlu)
+    function setActiveWeek(weekNumber, isManualTrigger = false) {
+        if (weekNumber < 1 || weekNumber > 4) return;
+        activeWeek = weekNumber;
+        renderScheduleByWeek(activeWeek);
+        // notifikasi update dengan parameter: jika manual trigger (klik user) => force notif biar kasih info meskipun minggu sama
+        // tapi jika minggu sama biasanya user klik ulang tidak perlu spam notif? tapi tidak masalah kasih notif ringan
+        // namun agar tidak double notif setiap klik, kita kirim force = true tapi cek if (week sama dan klik manual) beri notif.
+        // lebih baik selalu update notif, dan biarkan fungsi updateNotification mengirim notif jika previousNotifWeek berbeda.
+        // untuk manual trigger, kita ingin memberi feedback notifikasi meskipun minggu sama? biasanya tidak diperlukan, tapi kita set force sedikit.
+        // jika minggu sama dengan yang aktif, jangan kirim notif browser lagi. Kita biarkan logika perbedaan.
+        updateNotification(activeWeek, false);
+    }
+
+    // Membangun navigasi tombol minggu
+    function buildWeekNavigation() {
+        weekNavContainer.innerHTML = "";
+        for (let i = 1; i <= 4; i++) {
+            const btn = document.createElement("button");
+            btn.className = "week-btn";
+            if (i === activeWeek) btn.classList.add("active");
+            btn.setAttribute("data-week", i);
+            btn.innerHTML = `<i class="fas fa-calendar-week"></i> MINGGU ${i}`;
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                if (activeWeek !== i) {
+                    setActiveWeek(i, true);
+                    // animasi tambahan pada notif bar memberi efek update manual
+                    const notifDiv = document.getElementById("notificationBar");
+                    notifDiv.style.transition = "0.2s";
+                    notifDiv.style.backgroundColor = "#2c4c5e";
+                    setTimeout(() => {
+                        notifDiv.style.backgroundColor = "#1e2f3c";
+                    }, 300);
+                } else {
+                    // jika sama, tetap tampilkan info ringan dan getar notifikasi ringan (tapi tidak mengirim notif baru karena duplicate)
+                    const msgDiv = document.getElementById("notifMessage");
+                    msgDiv.style.opacity = "0.7";
+                    setTimeout(() => msgDiv.style.opacity = "1", 200);
+                }
+            });
+            weekNavContainer.appendChild(btn);
+        }
+    }
+
+    // ======================= SISTEM REAL-TIME DETEKSI PERGANTIAN MINGGU =======================
+    // Fungsi pengecekan setiap jam / interval menit untuk update minggu jika berubah (real-time behaviour)
+    let lastKnownWeek = activeWeek;
+    
+    function checkForWeekChange() {
+        const now = new Date();
+        const currentWeek = getCurrentWeekOfMonth(now);
+        if (currentWeek !== lastKnownWeek) {
+            // minggu berubah secara otomatis
+            lastKnownWeek = currentWeek;
+            activeWeek = currentWeek;
+            // render ulang semua berdasarkan minggu baru
+            renderScheduleByWeek(activeWeek);
+            updateNotification(activeWeek, true);  // true memaksa notifikasi karena pergantian minggu otomatis
+            // update tampilan navigasi
+            document.querySelectorAll(".week-btn").forEach(btn => {
+                const w = parseInt(btn.getAttribute("data-week"));
+                if (w === activeWeek) btn.classList.add("active");
+                else btn.classList.remove("active");
+            });
+            // juga tambahkan efek visual pada bar
+            const notifBar = document.getElementById("notificationBar");
+            notifBar.style.background = "#1e4d5e";
+            setTimeout(() => notifBar.style.background = "#1e2f3c", 800);
+            // bonus update title
+            document.title = `🔄 Jimpitan · Minggu ${activeWeek}`;
+        } else {
+            // optional: tidak ada perubahan, tetapi untuk menjaga sinkronisasi global, 
+            // jika ada pergantian tanggal tanpa perubahan minggu tidak perlu
+        }
+    }
+
+    // realtime observer: cek setiap 30 detik dan juga saat fokus tab (interval moderate)
+    let intervalId = setInterval(checkForWeekChange, 30000); // setiap 30 detik
+    
+    // juga cek setiap kali tab menjadi aktif/visibility change
+    document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+            checkForWeekChange();
+        }
+    });
+    
+    // event saat load awal dan meminta izin notifikasi
+    window.addEventListener("load", () => {
+        // Request permission notifikasi dengan cara halus
+        if (Notification.permission === "default") {
+            // kita bisa minta izin setelah user interaksi pertama? atau langsung? disini lebih baik minta izin saat load tapi tidak mengganggu
+            // karena beberapa browser, minta izin tanpa gestur user mungkin diblok, tapi kita akan meminta saat load tidak apa2? lebih baik.
+            // tapi lebih etis: minta izin saat user klik pertama di notif bar? tapi biar default, kita minta izin di load dengan tenang.
+            // Namun agar tidak mengganggu, kita tunda 2 detik.
+            setTimeout(() => {
+                if (Notification.permission === "default") {
+                    Notification.requestPermission().then();
+                }
+            }, 2000);
+        }
+        
+        // Inisialisasi navigasi & schedule berdasarkan activeWeek realtime
+        buildWeekNavigation();
+        lastKnownWeek = getCurrentWeekOfMonth();
+        activeWeek = lastKnownWeek;
+        renderScheduleByWeek(activeWeek);
+        updateNotification(activeWeek, false); // set notif awal tanpa force notif ganda
+        document.title = `💰 Jimpitan · Minggu ${activeWeek}`;
+        
+        // cek lagi setelah 1 detik untuk memastikan konsistensi
+        setTimeout(() => {
+            checkForWeekChange();
+        }, 500);
+    });
+    
+    // optional: bersihkan interval saat page unload (baik)
+    window.addEventListener("beforeunload", () => {
+        if (intervalId) clearInterval(intervalId);
+    });
+    
+    // realtime jam digital (opsional untuk memberi sentuhan live)
+    const addLiveTime = () => {
+        const footer = document.querySelector(".footer-note");
+        if (footer && !footer.querySelector(".live-time")) {
+            const timeSpan = document.createElement("span");
+            timeSpan.className = "live-time";
+            timeSpan.style.fontSize = "0.7rem";
+            timeSpan.innerHTML = `<i class="far fa-clock"></i> <span id="liveClock">--:--:--</span>`;
+            footer.appendChild(timeSpan);
+            setInterval(() => {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute:'2-digit', second:'2-digit' });
+                const clockSpan = document.getElementById("liveClock");
+                if (clockSpan) clockSpan.innerText = timeStr;
+            }, 1000);
+        }
+    };
+    setTimeout(addLiveTime, 100);
+    
+    // jika pengguna mengganti minggu manual, notifikasi sudah ditangani tombol, 
+    // dan juga menambahkan detail interaktif untuk memudahkan.
+    
+    // handle state jika ada error data
+    window.scheduleData = scheduleData; // debug
+    
+    // Efek realtime tambahan: refresh setiap menit untuk memastikan data visual sinkron bulan baru
+    setInterval(() => {
+        // cek kembali setiap 5 menit perubahan hari (lebih aman)
+        checkForWeekChange();
+    }, 60000);
+</script>
+</body>
+</html>
